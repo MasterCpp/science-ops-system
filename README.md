@@ -203,6 +203,29 @@ DRAFT -> REGISTRATION_OPEN -> IN_PROGRESS -> ENDED -> ARCHIVED
 
 Archived activities are read-only by default. Super admin can unarchive and delete activities. Activity admin can manage activities but cannot delete them.
 
+### Activity Structure and Public Detail Baseline
+
+Protected activity structure endpoints:
+
+```text
+GET    /api/admin/activities/{activityId}/process-items
+POST   /api/admin/activities/{activityId}/process-items
+PUT    /api/admin/activities/{activityId}/process-items/{itemId}
+DELETE /api/admin/activities/{activityId}/process-items/{itemId}
+GET    /api/admin/activities/{activityId}/custom-fields
+POST   /api/admin/activities/{activityId}/custom-fields
+PUT    /api/admin/activities/{activityId}/custom-fields/{fieldId}
+DELETE /api/admin/activities/{activityId}/custom-fields/{fieldId}
+```
+
+Public mobile activity detail endpoint:
+
+```text
+GET /api/mobile/activities/{activityId}
+```
+
+The mobile H5 app reads the public detail endpoint and renders activity information, remaining capacity, process items, base registration fields, configured custom fields, and unavailable registration states.
+
 ## Important Documents
 
 - `AGENTS.md`: rules for AI agents working in this repo
@@ -218,4 +241,4 @@ Archived activities are read-only by default. Super admin can unarchive and dele
 
 ## Working Rule
 
-Follow `.scratch/issues/` dependency order. Authentication, RBAC, and basic activity lifecycle APIs are available. Registration, check-in, volunteer, survey, export, and other business workflows should still be implemented only when their corresponding issue is started.
+Follow `.scratch/issues/` dependency order. Authentication, RBAC, activity lifecycle APIs, activity process items, registration custom fields, and public mobile activity detail are available. Registration submission, check-in, volunteer, survey, export, and other business workflows should still be implemented only when their corresponding issue is started.

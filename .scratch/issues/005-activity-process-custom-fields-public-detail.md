@@ -1,6 +1,6 @@
 # Issue 005: 活动流程、报名自定义字段和公开活动详情
 
-Status: `ready-for-agent`
+Status: `completed`
 
 ## Parent
 
@@ -32,3 +32,12 @@ Status: `ready-for-agent`
 
 - `.scratch/issues/004-admin-activity-lifecycle.md`
 
+## Completion notes
+
+- Implemented admin process item APIs for add, edit, sort, list, and delete.
+- Implemented admin registration custom field APIs for add, edit, sort, list, and delete.
+- Enforced active custom field `field_key` uniqueness within one activity.
+- Implemented `GET /api/mobile/activities/{activityId}` public detail API.
+- Public detail returns activity public fields, remaining capacity, registration deadline, availability state, process items, and custom fields.
+- Replaced the mobile H5 placeholder with an activity detail page that renders public information, process items, base registration fields, custom fields, and disabled registration states.
+- Added backend tests covering process items, custom field uniqueness, public detail, and unavailable registration states.

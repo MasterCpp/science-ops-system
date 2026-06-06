@@ -22,4 +22,9 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> forbidden(ForbiddenException exception) {
         return ResponseEntity.status(403).body(ApiResponse.error("FORBIDDEN", exception.getMessage()));
     }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiResponse<Object>> conflict(ConflictException exception) {
+        return ResponseEntity.status(409).body(ApiResponse.error("CONFLICT", exception.getMessage()));
+    }
 }

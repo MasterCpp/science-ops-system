@@ -6,7 +6,7 @@ Last updated: 2026-06-06
 
 Implementation started.
 
-The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, and the Issue 004 admin activity lifecycle backend baseline.
+The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, and the Issue 005 activity process/custom-field/public-detail baseline.
 
 ## Completed
 
@@ -52,6 +52,11 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
   - archived read-only enforcement
   - super-admin-only unarchive and delete controls
   - in-progress capacity and registration deadline edit lock
+- Issue 005 activity process, custom fields, and public detail:
+  - admin process item create, list, update, sort, and delete APIs
+  - admin registration custom field create, list, update, sort, delete, and field-key uniqueness APIs
+  - public mobile activity detail API with remaining capacity and registration availability state
+  - mobile H5 activity detail page rendering public info, process items, and registration fields
 
 ## Key Decisions
 
@@ -113,7 +118,7 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
 Continue implementation from:
 
 ```text
-.scratch/issues/005-activity-process-custom-fields-public-detail.md
+.scratch/issues/006-audience-registration-flow.md
 ```
 
 Follow dependency order in `.scratch/issues/`.
@@ -132,7 +137,7 @@ Before implementing an issue, read:
 - Deployment documentation
 - Operation manual
 - Acceptance checklist
-- Frontend business screens
+- Remaining frontend business screens
 
 ## Known Notes
 
@@ -141,4 +146,4 @@ Before implementing an issue, read:
 - Issue 001 intentionally contains placeholder pages and `/api/health` only; business functionality starts in later issues.
 - Issue 002 verified Flyway migrations with H2 MySQL compatibility mode. Docker CLI is not available on this machine, so live MySQL container verification has not been run.
 - Issue 003 seeds development admin accounts only when `admin_user` is empty. Default local password is `password123`.
-- Issue 004 covers the backend activity master lifecycle only. Activity process items, registration custom fields, and public mobile detail are deferred to Issue 005.
+- Issue 005 exposes public activity detail and renders the mobile detail form shell. Actual audience registration submission is deferred to Issue 006.
