@@ -27,4 +27,9 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> conflict(ConflictException exception) {
         return ResponseEntity.status(409).body(ApiResponse.error("CONFLICT", exception.getMessage()));
     }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ApiResponse<Object>> businessRule(BusinessRuleException exception) {
+        return ResponseEntity.status(exception.status()).body(ApiResponse.error(exception.code(), exception.getMessage()));
+    }
 }

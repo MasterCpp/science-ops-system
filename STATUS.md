@@ -6,7 +6,7 @@ Last updated: 2026-06-06
 
 Implementation started.
 
-The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, and the Issue 005 activity process/custom-field/public-detail baseline.
+The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, the Issue 005 activity process/custom-field/public-detail baseline, and the Issue 006 audience registration baseline.
 
 ## Completed
 
@@ -57,6 +57,13 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
   - admin registration custom field create, list, update, sort, delete, and field-key uniqueness APIs
   - public mobile activity detail API with remaining capacity and registration availability state
   - mobile H5 activity detail page rendering public info, process items, and registration fields
+- Issue 006 audience registration:
+  - public mobile audience registration submission API
+  - mobile H5 registration submit and success state
+  - duplicate phone, deadline, and capacity business-rule errors
+  - admin registration list and backfill APIs
+  - admin registration cancel API with capacity release
+  - registration export as Excel-openable UTF-8 CSV
 
 ## Key Decisions
 
@@ -118,7 +125,7 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
 Continue implementation from:
 
 ```text
-.scratch/issues/006-audience-registration-flow.md
+.scratch/issues/007-audience-check-in-flow.md
 ```
 
 Follow dependency order in `.scratch/issues/`.
@@ -146,4 +153,4 @@ Before implementing an issue, read:
 - Issue 001 intentionally contains placeholder pages and `/api/health` only; business functionality starts in later issues.
 - Issue 002 verified Flyway migrations with H2 MySQL compatibility mode. Docker CLI is not available on this machine, so live MySQL container verification has not been run.
 - Issue 003 seeds development admin accounts only when `admin_user` is empty. Default local password is `password123`.
-- Issue 005 exposes public activity detail and renders the mobile detail form shell. Actual audience registration submission is deferred to Issue 006.
+- Issue 006 implements audience registration and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.

@@ -226,6 +226,32 @@ GET /api/mobile/activities/{activityId}
 
 The mobile H5 app reads the public detail endpoint and renders activity information, remaining capacity, process items, base registration fields, configured custom fields, and unavailable registration states.
 
+### Audience Registration Baseline
+
+Public mobile registration endpoint:
+
+```text
+POST /api/mobile/activities/{activityId}/registrations
+```
+
+Protected admin registration endpoints:
+
+```text
+GET  /api/admin/activities/{activityId}/registrations
+POST /api/admin/activities/{activityId}/registrations
+POST /api/admin/registrations/{registrationId}/cancel
+GET  /api/admin/activities/{activityId}/registrations/export
+```
+
+Implemented registration rules:
+
+- Activity must be registration open for public submission.
+- Public submission rejects duplicate active phone numbers with `DUPLICATE_SUBMISSION`.
+- Public submission rejects late registrations with `DEADLINE_PASSED`.
+- Public and admin submission reject over-capacity registrations with `CAPACITY_FULL`.
+- Cancelled registrations no longer consume capacity.
+- The export endpoint returns a UTF-8 CSV file that Excel can open.
+
 ## Important Documents
 
 - `AGENTS.md`: rules for AI agents working in this repo
@@ -241,4 +267,4 @@ The mobile H5 app reads the public detail endpoint and renders activity informat
 
 ## Working Rule
 
-Follow `.scratch/issues/` dependency order. Authentication, RBAC, activity lifecycle APIs, activity process items, registration custom fields, and public mobile activity detail are available. Registration submission, check-in, volunteer, survey, export, and other business workflows should still be implemented only when their corresponding issue is started.
+Follow `.scratch/issues/` dependency order. Authentication, RBAC, activity lifecycle APIs, activity process items, registration custom fields, public mobile activity detail, and audience registration are available. Check-in, volunteer, survey, export expansion, and other business workflows should still be implemented only when their corresponding issue is started.

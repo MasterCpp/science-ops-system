@@ -1,6 +1,6 @@
 # Issue 006: 观众报名闭环
 
-Status: `ready-for-agent`
+Status: `completed`
 
 ## Parent
 
@@ -36,3 +36,15 @@ Status: `ready-for-agent`
 
 - `.scratch/issues/005-activity-process-custom-fields-public-detail.md`
 
+## Completion notes
+
+- Implemented public mobile registration submission: `POST /api/mobile/activities/{activityId}/registrations`.
+- Mobile registration saves base fields and configured custom field values.
+- Mobile H5 activity page now submits the registration form and shows a registration success state.
+- Public registration rejects duplicate active phone numbers with `DUPLICATE_SUBMISSION`.
+- Public registration rejects late submissions with `DEADLINE_PASSED`.
+- Public and admin registration reject over-capacity submissions with `CAPACITY_FULL`.
+- Implemented admin registration list and backfill APIs.
+- Implemented admin registration cancellation; cancelled registrations no longer consume capacity.
+- Implemented registration export as a UTF-8 CSV file that Excel can open.
+- Added backend tests for success, duplicate phone, deadline, capacity, admin list/backfill/cancel, capacity release, and export.
