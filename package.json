@@ -1,0 +1,17 @@
+{
+  "name": "science-ops-system",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev:admin": "npm --workspace apps/admin-web run dev",
+    "dev:mobile": "npm --workspace apps/mobile-web run dev",
+    "build:admin": "npm --workspace apps/admin-web run build",
+    "build:mobile": "npm --workspace apps/mobile-web run build",
+    "dev:server": "mvn -f server/pom.xml spring-boot:run",
+    "test:server": "mvn -f server/pom.xml test"
+  },
+  "workspaces": [
+    "apps/admin-web",
+    "apps/mobile-web"
+  ]
+}
