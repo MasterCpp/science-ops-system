@@ -193,6 +193,58 @@ dd {
   gap: 14px;
 }
 
+.position-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.position-card {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.position-card.selected {
+  border-color: #1f6f63;
+  background: #edf8f4;
+}
+
+.position-card.full {
+  color: #7d8794;
+  background: #f1f5f9;
+}
+
+.position-card input {
+  width: auto;
+  margin-top: 4px;
+}
+
+.position-card span {
+  display: grid;
+  gap: 5px;
+}
+
+.position-card small {
+  color: #5b6675;
+  line-height: 1.45;
+}
+
+.attendance-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 label {
   display: grid;
   gap: 7px;

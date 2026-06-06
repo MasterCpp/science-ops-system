@@ -42,6 +42,7 @@ class PublicActivityService {
                 availability.reason(),
                 "/m/activities/" + activity.id(),
                 "/m/activities/" + activity.id() + "/check-in",
+                "/m/activities/" + activity.id() + "/volunteers",
                 repository.listProcessItems(activityId),
                 repository.listCustomFields(activityId)
         );

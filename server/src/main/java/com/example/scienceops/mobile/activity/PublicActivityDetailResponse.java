@@ -25,6 +25,7 @@ public record PublicActivityDetailResponse(
         String registrationUnavailableReason,
         String registrationLink,
         String checkInLink,
+        String volunteerLink,
         List<ProcessItemResponse> processItems,
         List<CustomFieldResponse> customFields
 ) {

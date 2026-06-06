@@ -1,6 +1,6 @@
 # Issue 008: 志愿者岗位和报名申请闭环
 
-Status: `ready-for-agent`
+Status: `completed`
 
 ## Parent
 
@@ -35,3 +35,14 @@ Status: `ready-for-agent`
 
 - `.scratch/issues/004-admin-activity-lifecycle.md`
 
+## Completion notes
+
+- Completed on 2026-06-07.
+- Added admin volunteer position create, list, update, and logical delete APIs.
+- Added public mobile volunteer position list and volunteer application submit APIs.
+- Added admin volunteer application list, approve, reject, cancel, and export APIs.
+- Position capacity is occupied only by `APPROVED` applications.
+- Duplicate same-activity phone applications return `DUPLICATE_SUBMISSION`.
+- Full positions return `CAPACITY_FULL`.
+- Mobile H5 now supports `/m/activities/{activityId}/volunteers` for public volunteer application.
+- Volunteer data export returns an Excel-openable UTF-8 CSV.

@@ -1,12 +1,12 @@
 # Project Status
 
-Last updated: 2026-06-06
+Last updated: 2026-06-07
 
 ## Current Phase
 
 Implementation started.
 
-The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, the Issue 005 activity process/custom-field/public-detail baseline, the Issue 006 audience registration baseline, and the Issue 007 audience check-in baseline.
+The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, the Issue 005 activity process/custom-field/public-detail baseline, the Issue 006 audience registration baseline, the Issue 007 audience check-in baseline, the Issue 008 volunteer position/application review baseline, the Issue 009 volunteer attendance/service-hours baseline, and the Issue 010 visitor report management baseline.
 
 ## Completed
 
@@ -71,6 +71,28 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
   - admin check-in list and manual check-in APIs
   - admin check-in revoke API with active-count release
   - check-in export as Excel-openable UTF-8 CSV
+- Issue 008 volunteer position and application review:
+  - admin volunteer position create, list, update, and logical delete APIs
+  - public mobile volunteer position list API
+  - public mobile volunteer application submit API and H5 volunteer application mode
+  - duplicate same-activity phone and full-position business-rule errors
+  - admin volunteer application list, approve, reject, and cancel APIs
+  - approved-only position capacity counting
+  - volunteer application export as Excel-openable UTF-8 CSV
+- Issue 009 volunteer attendance and service hours:
+  - public mobile volunteer attendance status lookup API
+  - public mobile volunteer check-in/check-out APIs and H5 attendance mode
+  - approved-only check-in with `NOT_APPROVED` business-rule error
+  - duplicate check-in/check-out business-rule errors
+  - admin volunteer attendance list, manual check-in, and manual check-out APIs
+  - admin service-minute adjustment with reason and attendance revocation APIs
+  - default service minutes from check-out minus check-in, adjusted effective minutes, and revoked effective minutes as zero
+- Issue 010 visitor report management:
+  - admin visitor report create, list, detail, update, and logical delete APIs
+  - optional activity linkage with existing-activity validation
+  - keyword, linked activity, and visit-date range filters
+  - visitor-report permission enforcement for list, write, delete, and export operations
+  - visitor report export as Excel-openable UTF-8 CSV with confirmed columns
 
 ## Key Decisions
 
@@ -132,7 +154,7 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
 Continue implementation from:
 
 ```text
-.scratch/issues/008-volunteer-position-application-review-flow.md
+.scratch/issues/011-activity-files-photos-archive-flow.md
 ```
 
 Follow dependency order in `.scratch/issues/`.
@@ -162,3 +184,6 @@ Before implementing an issue, read:
 - Issue 003 seeds development admin accounts only when `admin_user` is empty. Default local password is `password123`.
 - Issue 006 implements audience registration and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.
 - Issue 007 implements audience check-in and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.
+- Issue 008 implements volunteer position/application review and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.
+- Issue 009 implements volunteer check-in, check-out, service-hour calculation, manual corrections, and revocation. Issue 008 approval does not create attendance; attendance is created on check-in.
+- Issue 010 implements visitor report management and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.

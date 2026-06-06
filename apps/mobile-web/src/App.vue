@@ -9,6 +9,10 @@ const submitError = ref('')
 const activity = ref(null)
 const registrationResult = ref(null)
 const checkInResult = ref(null)
+const volunteerResult = ref(null)
+const volunteerPositions = ref([])
+const selectedPositionId = ref('')
+const volunteerAttendanceStatus = ref(null)
 const form = ref({
   name: '',
   phone: '',
@@ -19,6 +23,18 @@ const form = ref({
   customValues: {},
 })
 const checkInForm = ref({
+  phone: '',
+})
+const volunteerForm = ref({
+  name: '',
+  phone: '',
+  unitName: '',
+  ageGroup: 'Adult',
+  availableTimeNote: '',
+  experienceNote: '',
+  remark: '',
+})
+const volunteerAttendanceForm = ref({
   phone: '',
 })
 
@@ -41,6 +57,20 @@ const isRegistrationOpen = computed(() => {
 const isCheckInMode = computed(() => {
   const params = new URLSearchParams(window.location.search)
   return params.get('mode') === 'check-in' || window.location.pathname.includes('/check-in')
+})
+
+const isVolunteerMode = computed(() => {
+  const params = new URLSearchParams(window.location.search)
+  return (params.get('mode') === 'volunteers' || window.location.pathname.includes('/volunteers')) && !isVolunteerAttendanceMode.value
+})
+
+const isVolunteerAttendanceMode = computed(() => {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('mode') === 'volunteer-attendance' || window.location.pathname.includes('/volunteers/attendance')
+})
+
+const selectedPosition = computed(() => {
+  return volunteerPositions.value.find((position) => position.id === selectedPositionId.value)
 })
 
 const availabilityText = computed(() => {
@@ -72,12 +102,27 @@ onMounted(async () => {
       throw new Error(envelope.message || 'Activity not found.')
     }
     activity.value = envelope.data
+    if (isVolunteerMode.value) {
+      await loadVolunteerPositions()
+    }
   } catch (err) {
     error.value = err.message
   } finally {
     loading.value = false
   }
 })
+
+async function loadVolunteerPositions() {
+  const response = await fetch(`${apiBaseUrl}/api/mobile/activities/${activityId.value}/volunteer-positions`)
+  const envelope = await response.json()
+  if (!response.ok || !envelope.success) {
+    throw new Error(envelope.message || envelope.code || 'Volunteer positions unavailable.')
+  }
+  volunteerPositions.value = envelope.data
+  if (!selectedPositionId.value && volunteerPositions.value.length > 0) {
+    selectedPositionId.value = volunteerPositions.value[0].id
+  }
+}
 
 async function submitRegistration() {
   submitError.value = ''
@@ -139,6 +184,95 @@ async function submitCheckIn() {
   }
 }
 
+async function submitVolunteerApplication() {
+  submitError.value = ''
+  submitting.value = true
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/mobile/activities/${activity.value.id}/volunteer-applications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        positionId: selectedPositionId.value,
+        name: volunteerForm.value.name,
+        phone: volunteerForm.value.phone,
+        unitName: volunteerForm.value.unitName,
+        ageGroup: volunteerForm.value.ageGroup,
+        availableTimeNote: volunteerForm.value.availableTimeNote,
+        experienceNote: volunteerForm.value.experienceNote,
+        remark: volunteerForm.value.remark,
+      }),
+    })
+    const envelope = await response.json()
+    if (!response.ok || !envelope.success) {
+      throw new Error(envelope.message || envelope.code || 'Volunteer application failed.')
+    }
+    volunteerResult.value = envelope.data
+  } catch (err) {
+    submitError.value = err.message
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function lookupVolunteerAttendance() {
+  submitError.value = ''
+  volunteerAttendanceStatus.value = null
+  submitting.value = true
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/mobile/activities/${activity.value.id}/volunteer-applications/status`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phone: volunteerAttendanceForm.value.phone,
+      }),
+    })
+    const envelope = await response.json()
+    if (!response.ok || !envelope.success) {
+      throw new Error(envelope.message || envelope.code || 'Volunteer status lookup failed.')
+    }
+    volunteerAttendanceStatus.value = envelope.data
+  } catch (err) {
+    submitError.value = err.message
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function volunteerCheckIn() {
+  await submitVolunteerAttendanceAction('check-in')
+}
+
+async function volunteerCheckOut() {
+  await submitVolunteerAttendanceAction('check-out')
+}
+
+async function submitVolunteerAttendanceAction(action) {
+  submitError.value = ''
+  submitting.value = true
+  try {
+    const applicationId = volunteerAttendanceStatus.value.application.id
+    const response = await fetch(`${apiBaseUrl}/api/mobile/activities/${activity.value.id}/volunteer-applications/${applicationId}/${action}`, {
+      method: 'POST',
+    })
+    const envelope = await response.json()
+    if (!response.ok || !envelope.success) {
+      throw new Error(envelope.message || envelope.code || 'Volunteer attendance update failed.')
+    }
+    volunteerAttendanceStatus.value = {
+      ...volunteerAttendanceStatus.value,
+      attendance: envelope.data,
+    }
+  } catch (err) {
+    submitError.value = err.message
+  } finally {
+    submitting.value = false
+  }
+}
+
 function navigateTo(url) {
   window.location.href = url
 }
@@ -170,6 +304,27 @@ function navigateTo(url) {
         </div>
       </dl>
       <button type="button" @click="checkInResult = null">Back</button>
+    </section>
+
+    <section v-else-if="volunteerResult" class="screen success-screen">
+      <p class="eyebrow">Volunteer Application Submitted</p>
+      <h1>{{ volunteerResult.activityTitle }}</h1>
+      <dl class="facts success-facts">
+        <div>
+          <dt>Position</dt>
+          <dd>{{ volunteerResult.positionName }}</dd>
+        </div>
+        <div>
+          <dt>Name</dt>
+          <dd>{{ volunteerResult.name }}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{{ volunteerResult.status }}</dd>
+        </div>
+      </dl>
+      <p class="summary">Please wait for the organizer to review your application.</p>
+      <button type="button" @click="volunteerResult = null">Back to Positions</button>
     </section>
 
     <section v-else-if="registrationResult" class="screen success-screen">
@@ -248,7 +403,141 @@ function navigateTo(url) {
           </ol>
         </section>
 
-        <section v-if="isCheckInMode" class="section">
+        <section v-if="isVolunteerAttendanceMode" class="section">
+          <h2>Volunteer Service</h2>
+          <form class="registration-form" @submit.prevent="lookupVolunteerAttendance">
+            <label>
+              Phone
+              <input v-model.trim="volunteerAttendanceForm.phone" type="tel" required :disabled="submitting" />
+            </label>
+            <button type="submit" :disabled="submitting">
+              {{ submitting ? 'Looking up...' : 'Lookup Status' }}
+            </button>
+          </form>
+
+          <div v-if="volunteerAttendanceStatus" class="attendance-panel">
+            <dl class="facts success-facts">
+              <div>
+                <dt>Name</dt>
+                <dd>{{ volunteerAttendanceStatus.application.name }}</dd>
+              </div>
+              <div>
+                <dt>Position</dt>
+                <dd>{{ volunteerAttendanceStatus.application.positionName }}</dd>
+              </div>
+              <div>
+                <dt>Apply</dt>
+                <dd>{{ volunteerAttendanceStatus.application.status }}</dd>
+              </div>
+              <div>
+                <dt>Attend</dt>
+                <dd>{{ volunteerAttendanceStatus.attendance?.status || 'NOT_CHECKED_IN' }}</dd>
+              </div>
+              <div>
+                <dt>Check-in</dt>
+                <dd>{{ volunteerAttendanceStatus.attendance?.checkInTime || '-' }}</dd>
+              </div>
+              <div>
+                <dt>Check-out</dt>
+                <dd>{{ volunteerAttendanceStatus.attendance?.checkOutTime || '-' }}</dd>
+              </div>
+              <div>
+                <dt>Minutes</dt>
+                <dd>{{ volunteerAttendanceStatus.attendance?.effectiveServiceMinutes ?? 0 }}</dd>
+              </div>
+            </dl>
+            <div class="action-row">
+              <button
+                type="button"
+                :disabled="submitting || volunteerAttendanceStatus.application.status !== 'APPROVED' || volunteerAttendanceStatus.attendance?.status === 'CHECKED_IN' || volunteerAttendanceStatus.attendance?.status === 'CHECKED_OUT'"
+                @click="volunteerCheckIn"
+              >
+                Check In
+              </button>
+              <button
+                type="button"
+                :disabled="submitting || volunteerAttendanceStatus.application.status !== 'APPROVED' || volunteerAttendanceStatus.attendance?.status !== 'CHECKED_IN'"
+                @click="volunteerCheckOut"
+              >
+                Check Out
+              </button>
+            </div>
+          </div>
+
+          <p v-if="submitError" class="notice">{{ submitError }}</p>
+          <button type="button" class="secondary-button" @click="navigateTo(activity.volunteerLink)">
+            Volunteer Apply
+          </button>
+        </section>
+
+        <section v-else-if="isVolunteerMode" class="section">
+          <h2>Volunteer Positions</h2>
+          <div v-if="volunteerPositions.length" class="position-list">
+            <label
+              v-for="position in volunteerPositions"
+              :key="position.id"
+              class="position-card"
+              :class="{ selected: selectedPositionId === position.id, full: position.full }"
+            >
+              <input v-model="selectedPositionId" type="radio" name="position" :value="position.id" :disabled="position.full || submitting" />
+              <span>
+                <strong>{{ position.name }}</strong>
+                <small>{{ position.description || 'No description.' }}</small>
+                <small>{{ position.serviceStartTime }} - {{ position.serviceEndTime }}</small>
+                <small>{{ position.approvedCount }} approved / {{ position.capacity }} capacity</small>
+              </span>
+            </label>
+          </div>
+          <p v-else class="notice">No volunteer positions are available.</p>
+
+          <form class="registration-form" @submit.prevent="submitVolunteerApplication">
+            <label>
+              Name
+              <input v-model.trim="volunteerForm.name" type="text" required :disabled="!selectedPosition || selectedPosition.full || submitting" />
+            </label>
+            <label>
+              Phone
+              <input v-model.trim="volunteerForm.phone" type="tel" required :disabled="!selectedPosition || selectedPosition.full || submitting" />
+            </label>
+            <label>
+              Unit or school
+              <input v-model.trim="volunteerForm.unitName" type="text" :disabled="!selectedPosition || selectedPosition.full || submitting" />
+            </label>
+            <label>
+              Age group
+              <select v-model="volunteerForm.ageGroup" :disabled="!selectedPosition || selectedPosition.full || submitting">
+                <option>Adult</option>
+                <option>Student</option>
+                <option>Child</option>
+              </select>
+            </label>
+            <label>
+              Available time
+              <textarea v-model.trim="volunteerForm.availableTimeNote" rows="2" :disabled="!selectedPosition || selectedPosition.full || submitting"></textarea>
+            </label>
+            <label>
+              Experience
+              <textarea v-model.trim="volunteerForm.experienceNote" rows="2" :disabled="!selectedPosition || selectedPosition.full || submitting"></textarea>
+            </label>
+            <label>
+              Remark
+              <textarea v-model.trim="volunteerForm.remark" rows="3" :disabled="!selectedPosition || selectedPosition.full || submitting"></textarea>
+            </label>
+
+            <p v-if="submitError" class="notice">{{ submitError }}</p>
+            <button type="submit" :disabled="!selectedPosition || selectedPosition.full || submitting">
+              {{ submitting ? 'Submitting...' : 'Submit Volunteer Application' }}
+            </button>
+          </form>
+          <button type="button" class="secondary-button" @click="navigateTo(activity.registrationLink)">
+            Registration
+          </button>
+          <button type="button" class="secondary-button" @click="navigateTo(`${activity.volunteerLink}/attendance`)">
+            Volunteer Service
+          </button>
+        </section>
+
+        <section v-else-if="isCheckInMode" class="section">
           <h2>Activity Check-in</h2>
           <form class="registration-form" @submit.prevent="submitCheckIn">
             <label>
@@ -338,6 +627,9 @@ function navigateTo(url) {
           </form>
           <button type="button" class="secondary-button" @click="navigateTo(activity.checkInLink)">
             Check-in
+          </button>
+          <button type="button" class="secondary-button" @click="navigateTo(activity.volunteerLink)">
+            Volunteer
           </button>
         </section>
       </div>
