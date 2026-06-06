@@ -8,6 +8,7 @@ const error = ref('')
 const submitError = ref('')
 const activity = ref(null)
 const registrationResult = ref(null)
+const checkInResult = ref(null)
 const form = ref({
   name: '',
   phone: '',
@@ -16,6 +17,9 @@ const form = ref({
   ageGroup: 'Adult',
   remark: '',
   customValues: {},
+})
+const checkInForm = ref({
+  phone: '',
 })
 
 const activityId = computed(() => {
@@ -32,6 +36,11 @@ const activityId = computed(() => {
 
 const isRegistrationOpen = computed(() => {
   return activity.value?.registrationAvailability === 'OPEN'
+})
+
+const isCheckInMode = computed(() => {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('mode') === 'check-in' || window.location.pathname.includes('/check-in')
 })
 
 const availabilityText = computed(() => {
@@ -104,6 +113,35 @@ async function submitRegistration() {
     submitting.value = false
   }
 }
+
+async function submitCheckIn() {
+  submitError.value = ''
+  submitting.value = true
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/mobile/activities/${activity.value.id}/check-ins`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phone: checkInForm.value.phone,
+      }),
+    })
+    const envelope = await response.json()
+    if (!response.ok || !envelope.success) {
+      throw new Error(envelope.message || envelope.code || 'Check-in failed.')
+    }
+    checkInResult.value = envelope.data
+  } catch (err) {
+    submitError.value = err.message
+  } finally {
+    submitting.value = false
+  }
+}
+
+function navigateTo(url) {
+  window.location.href = url
+}
 </script>
 
 <template>
@@ -116,6 +154,22 @@ async function submitRegistration() {
       <p class="eyebrow">Activity</p>
       <h1>Unavailable</h1>
       <p class="summary">{{ error }}</p>
+    </section>
+
+    <section v-else-if="checkInResult" class="screen success-screen">
+      <p class="eyebrow">Check-in Successful</p>
+      <h1>{{ checkInResult.activityTitle }}</h1>
+      <dl class="facts success-facts">
+        <div>
+          <dt>Name</dt>
+          <dd>{{ checkInResult.name }}</dd>
+        </div>
+        <div>
+          <dt>Time</dt>
+          <dd>{{ checkInResult.checkInTime }}</dd>
+        </div>
+      </dl>
+      <button type="button" @click="checkInResult = null">Back</button>
     </section>
 
     <section v-else-if="registrationResult" class="screen success-screen">
@@ -194,7 +248,25 @@ async function submitRegistration() {
           </ol>
         </section>
 
-        <section class="section">
+        <section v-if="isCheckInMode" class="section">
+          <h2>Activity Check-in</h2>
+          <form class="registration-form" @submit.prevent="submitCheckIn">
+            <label>
+              Phone
+              <input v-model.trim="checkInForm.phone" type="tel" required :disabled="submitting" />
+            </label>
+
+            <p v-if="submitError" class="notice">{{ submitError }}</p>
+            <button type="submit" :disabled="submitting">
+              {{ submitting ? 'Checking in...' : 'Check In' }}
+            </button>
+          </form>
+          <button type="button" class="secondary-button" @click="navigateTo(activity.registrationLink)">
+            Registration
+          </button>
+        </section>
+
+        <section v-else class="section">
           <h2>Registration</h2>
           <form class="registration-form" @submit.prevent="submitRegistration">
             <label>
@@ -264,6 +336,9 @@ async function submitRegistration() {
               {{ submitting ? 'Submitting...' : 'Submit Registration' }}
             </button>
           </form>
+          <button type="button" class="secondary-button" @click="navigateTo(activity.checkInLink)">
+            Check-in
+          </button>
         </section>
       </div>
     </section>

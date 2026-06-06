@@ -23,6 +23,8 @@ public record PublicActivityDetailResponse(
         String status,
         String registrationAvailability,
         String registrationUnavailableReason,
+        String registrationLink,
+        String checkInLink,
         List<ProcessItemResponse> processItems,
         List<CustomFieldResponse> customFields
 ) {

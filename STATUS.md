@@ -6,7 +6,7 @@ Last updated: 2026-06-06
 
 Implementation started.
 
-The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, the Issue 005 activity process/custom-field/public-detail baseline, and the Issue 006 audience registration baseline.
+The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, the Issue 005 activity process/custom-field/public-detail baseline, the Issue 006 audience registration baseline, and the Issue 007 audience check-in baseline.
 
 ## Completed
 
@@ -64,6 +64,13 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
   - admin registration list and backfill APIs
   - admin registration cancel API with capacity release
   - registration export as Excel-openable UTF-8 CSV
+- Issue 007 audience check-in:
+  - fixed public check-in link in the mobile activity detail API
+  - public mobile audience check-in API and H5 check-in mode
+  - duplicate check-in, unregistered phone, cancelled registration, and invalid activity state errors
+  - admin check-in list and manual check-in APIs
+  - admin check-in revoke API with active-count release
+  - check-in export as Excel-openable UTF-8 CSV
 
 ## Key Decisions
 
@@ -125,7 +132,7 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
 Continue implementation from:
 
 ```text
-.scratch/issues/007-audience-check-in-flow.md
+.scratch/issues/008-volunteer-position-application-review-flow.md
 ```
 
 Follow dependency order in `.scratch/issues/`.
@@ -154,3 +161,4 @@ Before implementing an issue, read:
 - Issue 002 verified Flyway migrations with H2 MySQL compatibility mode. Docker CLI is not available on this machine, so live MySQL container verification has not been run.
 - Issue 003 seeds development admin accounts only when `admin_user` is empty. Default local password is `password123`.
 - Issue 006 implements audience registration and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.
+- Issue 007 implements audience check-in and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.

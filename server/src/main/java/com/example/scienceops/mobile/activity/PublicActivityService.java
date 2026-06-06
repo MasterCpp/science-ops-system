@@ -40,6 +40,8 @@ class PublicActivityService {
                 activity.status(),
                 availability.status(),
                 availability.reason(),
+                "/m/activities/" + activity.id(),
+                "/m/activities/" + activity.id() + "/check-in",
                 repository.listProcessItems(activityId),
                 repository.listCustomFields(activityId)
         );

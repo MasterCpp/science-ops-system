@@ -252,6 +252,34 @@ Implemented registration rules:
 - Cancelled registrations no longer consume capacity.
 - The export endpoint returns a UTF-8 CSV file that Excel can open.
 
+### Audience Check-In Baseline
+
+Public mobile check-in endpoint:
+
+```text
+POST /api/mobile/activities/{activityId}/check-ins
+```
+
+Protected admin check-in endpoints:
+
+```text
+GET  /api/admin/activities/{activityId}/check-ins
+POST /api/admin/activities/{activityId}/check-ins/manual
+POST /api/admin/check-ins/{checkInId}/revoke
+GET  /api/admin/activities/{activityId}/check-ins/export
+```
+
+Implemented check-in rules:
+
+- Public check-in requires the activity to be `IN_PROGRESS`.
+- Public check-in requires an existing non-cancelled registration for the submitted phone.
+- Duplicate active check-in returns `ALREADY_CHECKED_IN`.
+- Revoked check-ins are not counted as active check-ins.
+- Admin manual check-in records `method=MANUAL` and `manual=true`.
+- The public activity detail API returns fixed `registrationLink` and `checkInLink` values.
+- The mobile H5 app supports a check-in mode at `/m/activities/{activityId}/check-in`.
+- The export endpoint returns a UTF-8 CSV file that Excel can open.
+
 ## Important Documents
 
 - `AGENTS.md`: rules for AI agents working in this repo
@@ -267,4 +295,4 @@ Implemented registration rules:
 
 ## Working Rule
 
-Follow `.scratch/issues/` dependency order. Authentication, RBAC, activity lifecycle APIs, activity process items, registration custom fields, public mobile activity detail, and audience registration are available. Check-in, volunteer, survey, export expansion, and other business workflows should still be implemented only when their corresponding issue is started.
+Follow `.scratch/issues/` dependency order. Authentication, RBAC, activity lifecycle APIs, activity process items, registration custom fields, public mobile activity detail, audience registration, and audience check-in are available. Volunteer, survey, export expansion, and other business workflows should still be implemented only when their corresponding issue is started.

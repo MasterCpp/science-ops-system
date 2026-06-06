@@ -239,6 +239,14 @@ button:disabled {
   background: #e5e7eb;
 }
 
+.secondary-button {
+  width: 100%;
+  margin-top: 12px;
+  color: #176755;
+  background: #edf8f4;
+  border: 1px solid #89c7b5;
+}
+
 .eyebrow {
   margin: 0 0 12px;
   color: #1f6f63;
