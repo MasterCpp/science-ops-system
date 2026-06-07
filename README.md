@@ -1,52 +1,46 @@
 # Science Operations System
 
-科普运营系统是一个用于练习企业级项目从 0 到 1 流程的 Web 项目。系统目标是管理科普活动的创建、报名、签到、志愿者、来访报备、满意度问卷、照片归档、数据导出和活动总结。
+Science Operations System is a V1 web system for managing science outreach activities, registrations, check-ins, volunteers, visitor reports, surveys, files/photos, exports, operation logs, and admin accounts.
 
-当前已进入实现阶段。仓库包含项目上下文、需求、PRD、架构决策、数据库设计、原型、API 设计，以及可本地启动的前后端基线、数据库迁移基线和后台认证/RBAC 基线。
+This repository is also a learning project that practices an enterprise-style flow from requirement clarification through PRD, ADRs, database design, API design, issue slicing, implementation, testing, deployment documentation, and handoff.
 
 ## Current Status
 
-Read `STATUS.md` first for the current project phase, completed documents, next step, and known open work.
+V1 implementation issues `001` through `017` are complete.
 
-## Where To Start
+Read [STATUS.md](STATUS.md) for the current project state, completed modules, verification notes, and known V1 limitations.
 
-For humans:
+## Delivery Documents
 
-1. `README.md`
-2. `STATUS.md`
-3. `CONTEXT.md`
-4. `docs/prd/001-科普运营系统-v1.md`
-5. `docs/database/001-er-design.md`
-6. `docs/prototype/001-page-map.md`
-7. `docs/api/001-api-design.md`
+- [Deployment guide](docs/deployment/001-docker-compose-deployment.md)
+- [Operation manual](docs/operations/001-operation-manual.md)
+- [V1 acceptance checklist](docs/acceptance/001-v1-acceptance-checklist.md)
+- [Project status](STATUS.md)
+- [V1 PRD](docs/prd/001-科普运营系统-v1.md)
+- [API design](docs/api/001-api-design.md)
+- [Database design](docs/database/001-er-design.md)
+- [Test plan](docs/testing/001-test-plan.md)
 
-For AI agents:
+## V1 Scope
 
-1. `AGENTS.md`
-2. `STATUS.md`
-3. `CONTEXT.md`
-4. `docs/agents/issue-tracker.md`
-5. `docs/agents/triage-labels.md`
-6. `docs/agents/domain.md`
-7. The current task's PRD, ADR, issue, or design document
+Implemented:
 
-## Project Scope
-
-V1 includes:
-
-- Back-office management system
-- Mobile H5 registration and check-in pages
+- Back-office management APIs
+- Mobile H5 activity, registration, check-in, volunteer, and survey APIs/pages
 - Activity lifecycle management
+- Activity process items and registration custom fields
 - Audience registration and check-in
 - Volunteer positions, applications, review, attendance, and service-hour statistics
 - Visitor report management
-- Activity plan and process management
-- Satisfaction survey configuration, submission, statistics, and export
-- Activity photos and attachments
-- Excel exports and activity summary data
-- Operation logs and RBAC permissions
+- Survey configuration, submission, statistics, raw response list, and export
+- Activity file/photo upload, preview, download, delete, and photo ZIP archive
+- Dashboard and activity summary metrics
+- Operation logs
+- Admin account, role, and permission management
+- UTF-8 CSV exports that Excel can open
+- Docker Compose deployment baseline
 
-V1 does not include:
+Not included in V1:
 
 - WeChat mini program
 - Official account automatic publishing
@@ -54,72 +48,75 @@ V1 does not include:
 - Complex low-code form designer
 - Object storage
 - Automatic database backup
+- Native `.xlsx` export
 - Formal volunteer service certificate template
 - Fixed Logo/header/seal export templates
+- HTTPS/domain/CI/CD production setup
 
 ## Technical Direction
 
-- Repository layout: frontend/backend separated monorepo
-- Admin web: Vue 3 + Element Plus
-- Mobile web: H5 frontend
+- Monorepo layout with separated frontend/backend units
+- Admin web: Vue 3 + Element Plus baseline
+- Mobile web: Vue 3 H5 baseline
 - Backend: Spring Boot
 - Persistence: MyBatis-Plus + MySQL 8
 - Migrations: Flyway
 - Auth: Spring Security + JWT + RBAC
-- File storage: local server storage + MySQL metadata
-- Deployment baseline: Docker Compose + MySQL + Spring Boot + Nginx
+- File storage: local server storage plus MySQL metadata
+- Deployment: Docker Compose + MySQL + Spring Boot + Nginx
 
-## Local Development Baseline
-
-### Directory Layout
+## Directory Layout
 
 ```text
-apps/admin-web/   # Back-office placeholder app
-apps/mobile-web/  # Mobile H5 placeholder app
+apps/admin-web/   # Back-office frontend
+apps/mobile-web/  # Mobile H5 frontend
 server/           # Spring Boot API service
-docs/             # Project documents
-.scratch/         # Local issue tracker
-deploy/nginx/     # Nginx placeholder deployment config
+docs/             # Requirements, ADRs, API/database/test/delivery docs
+deploy/nginx/     # Nginx deployment config
+.scratch/issues/  # Local Markdown issue tracker
 ```
 
-### Ports
+## Local Development
 
-| Unit | Local port | Command |
-| --- | --- | --- |
-| Admin web | `5173` | `npm.cmd run dev:admin` |
-| Mobile H5 | `5174` | `npm.cmd run dev:mobile` |
-| Spring Boot API | `8080` | `mvn -f server/pom.xml spring-boot:run` |
-| Nginx compose entry | `8088` | `docker compose up` |
-| MySQL compose service | `3306` | `docker compose up` |
+PowerShell may block `npm.ps1` on this machine, so use `npm.cmd`.
 
-PowerShell blocks `npm.ps1` on this machine, so use `npm.cmd` from PowerShell.
-
-### First Setup
+Install frontend dependencies:
 
 ```powershell
 npm.cmd install
+```
+
+Run backend tests:
+
+```powershell
 mvn -f server/pom.xml test
 ```
 
-### Run Locally
-
-Admin web:
+Run admin web:
 
 ```powershell
 npm.cmd run dev:admin
 ```
 
-Open `http://localhost:5173/admin/`.
+Open:
 
-Mobile H5:
+```text
+http://localhost:5173/admin/
+```
+
+Run mobile H5:
 
 ```powershell
 npm.cmd run dev:mobile
 ```
 
-Open `http://localhost:5174/mobile/`.
+Open:
 
-Backend:
+```text
+http://localhost:5174/mobile/
+```
+
+Run backend:
 
 ```powershell
 mvn -f server/pom.xml spring-boot:run
@@ -131,27 +128,44 @@ Health check:
 Invoke-RestMethod http://localhost:8080/api/health
 ```
 
-### Docker Compose Skeleton
+## Docker Compose Deployment
 
-Copy `.env.example` to `.env` if local overrides are needed. The current Compose baseline includes:
+Copy `.env.example` to `.env` if local overrides are needed.
 
-- `mysql`: MySQL 8 database service.
-- `server`: Spring Boot backend container with local file storage mounted at `/app/storage`.
-- `nginx`: static file and reverse proxy placeholder for `/admin/`, `/mobile/`, and `/api/`.
-
-Build frontend assets before using the Nginx static routes:
+Build frontend assets:
 
 ```powershell
 npm.cmd run build:admin
 npm.cmd run build:mobile
-docker compose up --build
 ```
 
-### Admin Auth Baseline
+Start services:
 
-Backend startup seeds local RBAC baseline data when `admin_user` is empty.
+```powershell
+docker compose up --build -d
+```
 
-Default password for seeded accounts:
+Compose services:
+
+- `mysql`: MySQL 8 database
+- `server`: Spring Boot API, with local file storage mounted at `/app/storage`
+- `nginx`: serves `/admin/`, `/mobile/`, and proxies `/api/`
+
+Default Nginx entry:
+
+```text
+http://localhost:8088/admin/
+http://localhost:8088/mobile/
+http://localhost:8088/api/health
+```
+
+See [deployment guide](docs/deployment/001-docker-compose-deployment.md) for environment variables, ports, storage mount, startup order, Flyway, backup, and restore notes.
+
+## Seeded Admin Accounts
+
+Seeded accounts are created only when `admin_user` is empty.
+
+Default password:
 
 ```text
 password123
@@ -159,140 +173,13 @@ password123
 
 | Username | Role | Intended access |
 | --- | --- | --- |
-| `superadmin` | `SUPER_ADMIN` | Account management and operation logs included |
-| `activityadmin` | `ACTIVITY_ADMIN` | Activity operations, registration, check-in, visitor reports, surveys, files |
-| `volunteeradmin` | `VOLUNTEER_ADMIN` | Volunteer operations only |
+| `superadmin` | `SUPER_ADMIN` | Full access, account management, operation logs |
+| `activityadmin` | `ACTIVITY_ADMIN` | Activities, registration, check-in, visitor reports, surveys, files |
+| `volunteeradmin` | `VOLUNTEER_ADMIN` | Volunteer module |
 | `disabledadmin` | `SUPER_ADMIN` | Disabled account for login rejection tests |
 
-Auth endpoints:
+Change default passwords before real use.
 
-```text
-POST /api/admin/auth/login
-GET  /api/admin/auth/me
-```
+## Important Agent Rule
 
-JWT configuration:
-
-```text
-JWT_SECRET
-JWT_TTL_MINUTES
-```
-
-### Admin Activity Lifecycle Baseline
-
-Protected activity endpoints are available under:
-
-```text
-GET    /api/admin/activities
-POST   /api/admin/activities
-GET    /api/admin/activities/{activityId}
-PUT    /api/admin/activities/{activityId}
-DELETE /api/admin/activities/{activityId}
-POST   /api/admin/activities/{activityId}/publish
-POST   /api/admin/activities/{activityId}/start
-POST   /api/admin/activities/{activityId}/end
-POST   /api/admin/activities/{activityId}/archive
-POST   /api/admin/activities/{activityId}/unarchive
-```
-
-Implemented lifecycle:
-
-```text
-DRAFT -> REGISTRATION_OPEN -> IN_PROGRESS -> ENDED -> ARCHIVED
-```
-
-Archived activities are read-only by default. Super admin can unarchive and delete activities. Activity admin can manage activities but cannot delete them.
-
-### Activity Structure and Public Detail Baseline
-
-Protected activity structure endpoints:
-
-```text
-GET    /api/admin/activities/{activityId}/process-items
-POST   /api/admin/activities/{activityId}/process-items
-PUT    /api/admin/activities/{activityId}/process-items/{itemId}
-DELETE /api/admin/activities/{activityId}/process-items/{itemId}
-GET    /api/admin/activities/{activityId}/custom-fields
-POST   /api/admin/activities/{activityId}/custom-fields
-PUT    /api/admin/activities/{activityId}/custom-fields/{fieldId}
-DELETE /api/admin/activities/{activityId}/custom-fields/{fieldId}
-```
-
-Public mobile activity detail endpoint:
-
-```text
-GET /api/mobile/activities/{activityId}
-```
-
-The mobile H5 app reads the public detail endpoint and renders activity information, remaining capacity, process items, base registration fields, configured custom fields, and unavailable registration states.
-
-### Audience Registration Baseline
-
-Public mobile registration endpoint:
-
-```text
-POST /api/mobile/activities/{activityId}/registrations
-```
-
-Protected admin registration endpoints:
-
-```text
-GET  /api/admin/activities/{activityId}/registrations
-POST /api/admin/activities/{activityId}/registrations
-POST /api/admin/registrations/{registrationId}/cancel
-GET  /api/admin/activities/{activityId}/registrations/export
-```
-
-Implemented registration rules:
-
-- Activity must be registration open for public submission.
-- Public submission rejects duplicate active phone numbers with `DUPLICATE_SUBMISSION`.
-- Public submission rejects late registrations with `DEADLINE_PASSED`.
-- Public and admin submission reject over-capacity registrations with `CAPACITY_FULL`.
-- Cancelled registrations no longer consume capacity.
-- The export endpoint returns a UTF-8 CSV file that Excel can open.
-
-### Audience Check-In Baseline
-
-Public mobile check-in endpoint:
-
-```text
-POST /api/mobile/activities/{activityId}/check-ins
-```
-
-Protected admin check-in endpoints:
-
-```text
-GET  /api/admin/activities/{activityId}/check-ins
-POST /api/admin/activities/{activityId}/check-ins/manual
-POST /api/admin/check-ins/{checkInId}/revoke
-GET  /api/admin/activities/{activityId}/check-ins/export
-```
-
-Implemented check-in rules:
-
-- Public check-in requires the activity to be `IN_PROGRESS`.
-- Public check-in requires an existing non-cancelled registration for the submitted phone.
-- Duplicate active check-in returns `ALREADY_CHECKED_IN`.
-- Revoked check-ins are not counted as active check-ins.
-- Admin manual check-in records `method=MANUAL` and `manual=true`.
-- The public activity detail API returns fixed `registrationLink` and `checkInLink` values.
-- The mobile H5 app supports a check-in mode at `/m/activities/{activityId}/check-in`.
-- The export endpoint returns a UTF-8 CSV file that Excel can open.
-
-## Important Documents
-
-- `AGENTS.md`: rules for AI agents working in this repo
-- `STATUS.md`: current phase and next actions
-- `CONTEXT.md`: long-lived project context
-- `docs/requirements/需求澄清.md`: confirmed requirement clarification
-- `docs/prd/001-科普运营系统-v1.md`: V1 PRD
-- `docs/adr/`: accepted architecture decision records
-- `docs/database/001-er-design.md`: V1 ER/database design
-- `docs/prototype/`: page map and low-fidelity wireframes
-- `docs/api/001-api-design.md`: first-pass API design
-- `.scratch/issues/`: local Markdown issue tracker
-
-## Working Rule
-
-Follow `.scratch/issues/` dependency order. Authentication, RBAC, activity lifecycle APIs, activity process items, registration custom fields, public mobile activity detail, audience registration, and audience check-in are available. Volunteer, survey, export expansion, and other business workflows should still be implemented only when their corresponding issue is started.
+For future agent work, read [AGENTS.md](AGENTS.md), [STATUS.md](STATUS.md), and [CONTEXT.md](CONTEXT.md) before changing requirements, issues, docs, or code.

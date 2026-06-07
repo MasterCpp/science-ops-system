@@ -4,9 +4,9 @@ Last updated: 2026-06-07
 
 ## Current Phase
 
-Implementation started.
+V1 implementation and delivery documentation are complete.
 
-The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, the Issue 005 activity process/custom-field/public-detail baseline, the Issue 006 audience registration baseline, the Issue 007 audience check-in baseline, the Issue 008 volunteer position/application review baseline, the Issue 009 volunteer attendance/service-hours baseline, the Issue 010 visitor report management baseline, the Issue 011 activity file/photo archive baseline, the Issue 012 survey configuration baseline, the Issue 013 survey response/statistics/export baseline, the Issue 014 dashboard/activity summary baseline, the Issue 015 operation log audit query baseline, and the Issue 016 admin account/role management baseline.
+The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, implementation issues 001 through 016, and the Issue 017 deployment documentation, operation manual, and acceptance checklist handoff package.
 
 ## Completed
 
@@ -134,6 +134,12 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
   - role and permission lookup APIs
   - BCrypt password writes for created and reset accounts
   - disabled accounts rejected at login through existing auth flow
+- Issue 017 delivery documentation:
+  - Docker Compose deployment guide
+  - operation manual covering admin and mobile H5 workflows
+  - seeded test account handoff notes
+  - V1 acceptance checklist
+  - README and STATUS handoff updates
 
 ## Key Decisions
 
@@ -171,6 +177,9 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
 - `docs/prototype/003-mobile-wireframes.md`
 - `docs/api/001-api-design.md`
 - `docs/testing/001-test-plan.md`
+- `docs/deployment/001-docker-compose-deployment.md`
+- `docs/operations/001-operation-manual.md`
+- `docs/acceptance/001-v1-acceptance-checklist.md`
 - `.scratch/issues/000-prd-science-ops-system-v1.md`
 - `.scratch/issues/001-project-scaffold-and-dev-baseline.md`
 - `.scratch/issues/002-database-migrations-and-base-entities.md`
@@ -192,29 +201,18 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
 
 ## Next Step
 
-Continue implementation from:
+V1 issue implementation is complete. Recommended handoff actions:
 
 ```text
-.scratch/issues/017-deployment-docs-operation-manual-acceptance.md
+1. Review docs/acceptance/001-v1-acceptance-checklist.md with the delivery owner.
+2. Change seeded default passwords before real use.
+3. Commit and push the Issue 017 documentation changes.
 ```
-
-Follow dependency order in `.scratch/issues/`.
-
-Before implementing an issue, read:
-
-- `docs/prd/001-科普运营系统-v1.md`
-- `docs/database/001-er-design.md`
-- `docs/prototype/*.md`
-- `docs/api/001-api-design.md`
-- `docs/testing/001-test-plan.md`
-- The issue file being implemented
 
 ## Not Started
 
-- Deployment documentation
-- Operation manual
-- Acceptance checklist
-- Remaining frontend business screens
+- No remaining V1 implementation issue is open.
+- Optional future work: richer production-grade admin frontend screens, native `.xlsx` exports, automatic backups, HTTPS/domain setup, CI/CD, object storage, SMS, mini program, and certificate templates.
 
 ## Known Notes
 
@@ -234,3 +232,5 @@ Before implementing an issue, read:
 - Issue 014 adds dashboard read APIs and activity detail summary metrics. Dashboard metric visibility follows the admin role's permissions.
 - Issue 015 implements append-only operation logs and super-admin query APIs. There is intentionally no log deletion API in V1.
 - Issue 016 implements account management APIs for super admin only. Account deletion is not included in V1; accounts are enabled or disabled by status.
+- Issue 017 completes delivery documentation and acceptance checklist. Backend tests and both frontend builds passed on 2026-06-07.
+- Admin frontend build currently emits a large-chunk warning and third-party Rollup comment warnings, but the production build succeeds.

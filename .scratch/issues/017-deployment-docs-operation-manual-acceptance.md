@@ -1,6 +1,5 @@
-# Issue 017: 部署文档、操作说明和验收清单
-
-Status: `ready-for-agent`
+# Issue 017: Deployment Docs, Operation Manual, and Acceptance Checklist
+Status: `completed`
 
 ## Parent
 
@@ -13,22 +12,46 @@ Status: `ready-for-agent`
 - `docs/adr/006-deployment-baseline.md`
 - `docs/testing/001-test-plan.md`
 
-## What to build
+## What was built
 
-在所有 V1 功能切片完成后，补齐 Docker Compose 部署文档、系统操作说明、测试账号说明和验收清单，形成可交付资料。
+Completed V1 delivery documents after all implementation slices were finished:
+
+- Docker Compose deployment guide
+- Operation manual
+- Test account notes
+- V1 acceptance checklist
+- README and STATUS handoff updates
 
 ## Acceptance criteria
 
-- [ ] 部署文档说明 Docker Compose 启动 MySQL、Spring Boot 和 Nginx。
-- [ ] 部署文档说明环境变量、端口、数据库连接、文件存储挂载和启动顺序。
-- [ ] 部署文档说明 Flyway 迁移如何执行。
-- [ ] 部署文档说明 MySQL 数据和本地文件存储如何备份。
-- [ ] 操作说明覆盖后台登录、活动管理、报名管理、签到管理、志愿者管理、来访报备、问卷、照片、导出、日志和账号管理。
-- [ ] 手机 H5 操作说明覆盖报名、签到、志愿者申请、志愿者签到/签退、问卷填写。
-- [ ] 提供测试账号说明，包括超级管理员、活动管理员、志愿者管理员。
-- [ ] 验收清单覆盖 PRD、测试计划和主要业务闭环。
-- [ ] README 和 STATUS 更新到交付前状态。
-- [ ] 不引入未实现功能的说明。
+- [x] Deployment docs explain Docker Compose startup for MySQL, Spring Boot, and Nginx.
+- [x] Deployment docs explain environment variables, ports, database connection, file-storage mount, and startup order.
+- [x] Deployment docs explain how Flyway migrations run.
+- [x] Deployment docs explain how to back up MySQL data and local file storage.
+- [x] Operation manual covers admin login, activity management, registration management, check-in management, volunteer management, visitor reports, surveys, photos/files, exports, operation logs, and account management.
+- [x] Mobile H5 operation notes cover registration, check-in, volunteer application, volunteer check-in/check-out, and survey submission.
+- [x] Test account notes cover super admin, activity admin, volunteer admin, and disabled admin.
+- [x] Acceptance checklist covers PRD, test plan, and major business loops.
+- [x] README and STATUS are updated to V1 handoff state.
+- [x] Docs do not claim unsupported V1 features such as mini program, SMS, object storage, automatic backups, or native `.xlsx` export.
+
+## Implemented files
+
+- `docs/deployment/001-docker-compose-deployment.md`
+- `docs/operations/001-operation-manual.md`
+- `docs/acceptance/001-v1-acceptance-checklist.md`
+- `README.md`
+- `STATUS.md`
+
+## Verification
+
+- `mvn -f server/pom.xml test`
+  - Result: `53 tests, 0 failures, 0 errors`
+- `npm.cmd run build:admin`
+  - Result: build succeeded
+  - Notes: Vite reported a large-chunk warning and third-party comment warnings, but produced the production build.
+- `npm.cmd run build:mobile`
+  - Result: build succeeded
 
 ## Blocked by
 
@@ -48,4 +71,3 @@ Status: `ready-for-agent`
 - `.scratch/issues/014-dashboard-and-activity-summary.md`
 - `.scratch/issues/015-operation-log-audit-query.md`
 - `.scratch/issues/016-admin-account-role-management.md`
-
