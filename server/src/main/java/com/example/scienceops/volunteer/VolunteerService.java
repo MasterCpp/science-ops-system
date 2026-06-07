@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.example.scienceops.common.api.PagedResponse;
@@ -13,6 +14,7 @@ import com.example.scienceops.common.enums.VolunteerApplicationStatus;
 import com.example.scienceops.common.enums.VolunteerAttendanceStatus;
 import com.example.scienceops.common.error.BusinessRuleException;
 import com.example.scienceops.common.error.NotFoundException;
+import com.example.scienceops.operationlog.OperationLogService;
 import com.example.scienceops.security.AdminPrincipal;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +22,12 @@ import org.springframework.stereotype.Service;
 public class VolunteerService {
 
     private final VolunteerRepository repository;
+    private final OperationLogService operationLogService;
     private final Clock clock;
 
-    public VolunteerService(VolunteerRepository repository) {
+    public VolunteerService(VolunteerRepository repository, OperationLogService operationLogService) {
         this.repository = repository;
+        this.operationLogService = operationLogService;
         this.clock = Clock.systemDefaultZone();
     }
 
@@ -110,17 +114,17 @@ public class VolunteerService {
                 && position.approvedCount() >= position.capacity()) {
             throw new BusinessRuleException("CAPACITY_FULL", "Volunteer position is full", 409);
         }
-        return review(applicationId, VolunteerApplicationStatus.APPROVED, request, principal);
+        return review(applicationId, VolunteerApplicationStatus.APPROVED, request, principal, "VOLUNTEER_APPLICATION_APPROVE");
     }
 
     public VolunteerApplicationResponse reject(Long applicationId, VolunteerApplicationReviewRequest request, AdminPrincipal principal) {
         requireApplication(applicationId);
-        return review(applicationId, VolunteerApplicationStatus.REJECTED, request, principal);
+        return review(applicationId, VolunteerApplicationStatus.REJECTED, request, principal, "VOLUNTEER_APPLICATION_REJECT");
     }
 
     public VolunteerApplicationResponse cancel(Long applicationId, VolunteerApplicationReviewRequest request, AdminPrincipal principal) {
         requireApplication(applicationId);
-        return review(applicationId, VolunteerApplicationStatus.CANCELLED, request, principal);
+        return review(applicationId, VolunteerApplicationStatus.CANCELLED, request, principal, "VOLUNTEER_APPLICATION_CANCEL");
     }
 
     public byte[] exportCsv(Long activityId, Long positionId, String status) {
@@ -184,7 +188,13 @@ public class VolunteerService {
         }
         requireApproved(application);
         LocalDateTime checkInTime = request.checkInTime() == null ? LocalDateTime.now(clock) : request.checkInTime();
-        return createOrReactivateAttendance(application, checkInTime, principal.id());
+        VolunteerAttendanceResponse response = createOrReactivateAttendance(application, checkInTime, principal.id());
+        operationLogService.record(principal, "VOLUNTEER_ATTENDANCE_MANUAL_CHECK_IN", "VOLUNTEER_ATTENDANCE", Long.valueOf(response.id()), response.name(), Map.of(
+                "activityId", application.activityId(),
+                "applicationId", application.id(),
+                "phone", application.phone()
+        ));
+        return response;
     }
 
     public VolunteerAttendanceResponse manualCheckOut(Long applicationId, ManualVolunteerCheckOutRequest request, AdminPrincipal principal) {
@@ -193,7 +203,13 @@ public class VolunteerService {
         VolunteerAttendanceRecord attendance = repository.findAttendanceByApplicationId(applicationId)
                 .orElseThrow(() -> new BusinessRuleException("NOT_CHECKED_IN", "Volunteer has not checked in", 409));
         LocalDateTime checkOutTime = request == null || request.checkOutTime() == null ? LocalDateTime.now(clock) : request.checkOutTime();
-        return checkOut(attendance, checkOutTime, principal.id());
+        VolunteerAttendanceResponse response = checkOut(attendance, checkOutTime, principal.id());
+        operationLogService.record(principal, "VOLUNTEER_ATTENDANCE_MANUAL_CHECK_OUT", "VOLUNTEER_ATTENDANCE", Long.valueOf(response.id()), response.name(), Map.of(
+                "activityId", application.activityId(),
+                "applicationId", application.id(),
+                "phone", application.phone()
+        ));
+        return response;
     }
 
     public VolunteerAttendanceResponse adjustAttendance(Long attendanceId, VolunteerAttendanceAdjustRequest request, AdminPrincipal principal) {
@@ -203,18 +219,30 @@ public class VolunteerService {
             throw new BusinessRuleException("INVALID_STATE", "Revoked attendance cannot be adjusted", 409);
         }
         repository.adjustAttendance(attendanceId, request.serviceMinutes(), request.adjustmentReason(), principal.id(), LocalDateTime.now(clock));
-        return repository.findAttendance(attendanceId)
+        VolunteerAttendanceResponse response = repository.findAttendance(attendanceId)
                 .map(this::toAttendanceResponse)
                 .orElseThrow(() -> new NotFoundException("Volunteer attendance not found"));
+        operationLogService.record(principal, "VOLUNTEER_ATTENDANCE_ADJUST", "VOLUNTEER_ATTENDANCE", attendance.id(), attendance.name(), Map.of(
+                "activityId", attendance.activityId(),
+                "applicationId", attendance.applicationId(),
+                "serviceMinutes", request.serviceMinutes()
+        ));
+        return response;
     }
 
     public VolunteerAttendanceResponse revokeAttendance(Long attendanceId, AdminPrincipal principal) {
-        repository.findAttendance(attendanceId)
+        VolunteerAttendanceRecord attendance = repository.findAttendance(attendanceId)
                 .orElseThrow(() -> new NotFoundException("Volunteer attendance not found"));
         repository.revokeAttendance(attendanceId, principal.id(), LocalDateTime.now(clock));
-        return repository.findAttendance(attendanceId)
+        VolunteerAttendanceResponse response = repository.findAttendance(attendanceId)
                 .map(this::toAttendanceResponse)
                 .orElseThrow(() -> new NotFoundException("Volunteer attendance not found"));
+        operationLogService.record(principal, "VOLUNTEER_ATTENDANCE_REVOKE", "VOLUNTEER_ATTENDANCE", attendance.id(), attendance.name(), Map.of(
+                "activityId", attendance.activityId(),
+                "applicationId", attendance.applicationId(),
+                "phone", attendance.phone()
+        ));
+        return response;
     }
 
     public PagedResponse<VolunteerAttendanceResponse> listAttendances(Long activityId, Long positionId, String keyword, String status, int page, int pageSize) {
@@ -234,11 +262,25 @@ public class VolunteerService {
         );
     }
 
-    private VolunteerApplicationResponse review(Long applicationId, VolunteerApplicationStatus status, VolunteerApplicationReviewRequest request, AdminPrincipal principal) {
+    private VolunteerApplicationResponse review(
+            Long applicationId,
+            VolunteerApplicationStatus status,
+            VolunteerApplicationReviewRequest request,
+            AdminPrincipal principal,
+            String action
+    ) {
+        VolunteerApplicationRecord before = requireApplication(applicationId);
         repository.reviewApplication(applicationId, status.name(), principal.id(), request == null ? null : request.reviewNote(), LocalDateTime.now(clock));
-        return repository.findApplication(applicationId)
+        VolunteerApplicationResponse response = repository.findApplication(applicationId)
                 .map(this::toApplicationResponse)
                 .orElseThrow(() -> new NotFoundException("Volunteer application not found"));
+        operationLogService.record(principal, action, "VOLUNTEER_APPLICATION", before.id(), before.name(), Map.of(
+                "activityId", before.activityId(),
+                "positionId", before.positionId(),
+                "phone", before.phone(),
+                "status", status.name()
+        ));
+        return response;
     }
 
     private VolunteerAttendanceResponse createOrReactivateAttendance(VolunteerApplicationRecord application, LocalDateTime checkInTime, Long handledBy) {

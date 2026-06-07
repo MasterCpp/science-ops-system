@@ -6,7 +6,7 @@ Last updated: 2026-06-07
 
 Implementation started.
 
-The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, the Issue 005 activity process/custom-field/public-detail baseline, the Issue 006 audience registration baseline, the Issue 007 audience check-in baseline, the Issue 008 volunteer position/application review baseline, the Issue 009 volunteer attendance/service-hours baseline, and the Issue 010 visitor report management baseline.
+The project has completed requirement clarification, PRD, core ADRs, ER/database design, page prototypes, first-pass API design, V1 test plan, implementation issue breakdown, the Issue 001 runnable project scaffold baseline, the Issue 002 database migration/base entity baseline, the Issue 003 admin auth/JWT/RBAC baseline, the Issue 004 admin activity lifecycle backend baseline, the Issue 005 activity process/custom-field/public-detail baseline, the Issue 006 audience registration baseline, the Issue 007 audience check-in baseline, the Issue 008 volunteer position/application review baseline, the Issue 009 volunteer attendance/service-hours baseline, the Issue 010 visitor report management baseline, the Issue 011 activity file/photo archive baseline, the Issue 012 survey configuration baseline, the Issue 013 survey response/statistics/export baseline, the Issue 014 dashboard/activity summary baseline, the Issue 015 operation log audit query baseline, and the Issue 016 admin account/role management baseline.
 
 ## Completed
 
@@ -93,6 +93,47 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
   - keyword, linked activity, and visit-date range filters
   - visitor-report permission enforcement for list, write, delete, and export operations
   - visitor report export as Excel-openable UTF-8 CSV with confirmed columns
+- Issue 011 activity files and photo archive:
+  - local file storage rooted at `science-ops.storage.local-path`
+  - admin activity file upload, list, preview, download, delete, and photo ZIP APIs
+  - cover, attachment, and photo category validation with category-specific size limits
+  - `UNSUPPORTED_FILE_TYPE` and `FILE_TOO_LARGE` business-rule errors
+  - file metadata persistence in `file_asset`
+  - logical deletion hiding normal lists and excluding deleted photos from ZIP downloads
+- Issue 012 survey configuration:
+  - admin survey create, detail, update, publish, and close APIs
+  - one V1 survey per activity enforcement
+  - survey title and description management
+  - single-choice, multiple-choice, rating, and text question management
+  - choice-question option management
+  - nested survey detail with sorted questions and sorted options for admin editing
+- Issue 013 survey response, statistics, and export:
+  - public mobile survey eligibility, detail, and response submission APIs
+  - checked-in registration and published-survey eligibility enforcement
+  - single-choice, multiple-choice, rating, and text answer persistence
+  - duplicate response prevention with `DUPLICATE_SUBMISSION`
+  - unchecked registration rejection with `NOT_CHECKED_IN`
+  - submitted-survey configuration edit locking
+  - admin survey statistics, raw response list, and Excel-openable UTF-8 CSV export APIs
+- Issue 014 dashboard and activity summary:
+  - admin activity detail summary metrics for registration, check-in, volunteer, survey, and photo data
+  - check-in rate, survey average rating, and total effective volunteer service minutes
+  - role-aware dashboard summary endpoint
+  - dashboard upcoming activity endpoint
+  - dashboard pending volunteer application endpoint
+  - exclusion of cancelled registrations, revoked check-ins, revoked volunteer attendance, and deleted photos
+- Issue 015 operation log audit query:
+  - append-only operation log repository and service
+  - super-admin-only operation log list and detail APIs
+  - filters by admin user, action, target type, and created-time range
+  - audit writes for activity lifecycle, exports, registration backfill/cancel, check-in backfill/revoke, volunteer review/attendance, and file deletion
+  - request metadata capture for IP and User-Agent
+- Issue 016 admin account and role management:
+  - super-admin-only admin user list, detail, create, update, password reset, and role assignment APIs
+  - account list filters by keyword, status, and role
+  - role and permission lookup APIs
+  - BCrypt password writes for created and reset accounts
+  - disabled accounts rejected at login through existing auth flow
 
 ## Key Decisions
 
@@ -154,7 +195,7 @@ The project has completed requirement clarification, PRD, core ADRs, ER/database
 Continue implementation from:
 
 ```text
-.scratch/issues/011-activity-files-photos-archive-flow.md
+.scratch/issues/017-deployment-docs-operation-manual-acceptance.md
 ```
 
 Follow dependency order in `.scratch/issues/`.
@@ -187,3 +228,9 @@ Before implementing an issue, read:
 - Issue 008 implements volunteer position/application review and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.
 - Issue 009 implements volunteer check-in, check-out, service-hour calculation, manual corrections, and revocation. Issue 008 approval does not create attendance; attendance is created on check-in.
 - Issue 010 implements visitor report management and a CSV export that Excel can open. Native `.xlsx` export can be added later if delivery requires it.
+- Issue 011 implements local file storage and photo ZIP downloads. Deployment documentation should define backup expectations for `science-ops.storage.local-path`.
+- Issue 012 implements survey configuration only. Public survey response, statistics, and export are handled by Issue 013.
+- Issue 013 implements survey response, statistics, and export. Native `.xlsx` export can be added later if delivery requires it.
+- Issue 014 adds dashboard read APIs and activity detail summary metrics. Dashboard metric visibility follows the admin role's permissions.
+- Issue 015 implements append-only operation logs and super-admin query APIs. There is intentionally no log deletion API in V1.
+- Issue 016 implements account management APIs for super admin only. Account deletion is not included in V1; accounts are enabled or disabled by status.

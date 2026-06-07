@@ -1,7 +1,11 @@
 package com.example.scienceops.admin.volunteer;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import com.example.scienceops.common.api.ApiResponse;
 import com.example.scienceops.common.api.PagedResponse;
+import com.example.scienceops.operationlog.OperationLogService;
 import com.example.scienceops.security.AdminPrincipal;
 import com.example.scienceops.volunteer.ManualVolunteerCheckInRequest;
 import com.example.scienceops.volunteer.ManualVolunteerCheckOutRequest;
@@ -33,9 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminVolunteerController {
 
     private final VolunteerService service;
+    private final OperationLogService operationLogService;
 
-    public AdminVolunteerController(VolunteerService service) {
+    public AdminVolunteerController(VolunteerService service, OperationLogService operationLogService) {
         this.service = service;
+        this.operationLogService = operationLogService;
     }
 
     @GetMapping("/activities/{activityId}/volunteer-positions")
@@ -121,12 +127,15 @@ public class AdminVolunteerController {
     public ResponseEntity<byte[]> export(
             @RequestParam(required = false) Long activityId,
             @RequestParam(required = false) Long positionId,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @AuthenticationPrincipal AdminPrincipal principal
     ) {
+        byte[] csv = service.exportCsv(activityId, positionId, status);
+        operationLogService.record(principal, "VOLUNTEER_APPLICATION_EXPORT", "VOLUNTEER_APPLICATION", activityId, "Volunteer applications", exportDetails(activityId, positionId, status));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"volunteer-applications.csv\"")
                 .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
-                .body(service.exportCsv(activityId, positionId, status));
+                .body(csv);
     }
 
     @GetMapping("/volunteer-attendance")
@@ -179,5 +188,13 @@ public class AdminVolunteerController {
             @AuthenticationPrincipal AdminPrincipal principal
     ) {
         return ApiResponse.ok(service.revokeAttendance(attendanceId, principal));
+    }
+
+    private Map<String, Object> exportDetails(Long activityId, Long positionId, String status) {
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("activityId", activityId);
+        details.put("positionId", positionId);
+        details.put("status", status);
+        return details;
     }
 }

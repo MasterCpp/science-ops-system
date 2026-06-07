@@ -12,18 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin")
 public class RbacProbeController {
 
-    @GetMapping("/users")
-    @PreAuthorize("hasAuthority('admin-user:manage')")
-    public ApiResponse<Map<String, Object>> users() {
-        return probe("admin-user:manage");
-    }
-
-    @GetMapping("/operation-logs")
-    @PreAuthorize("hasAuthority('operation-log:view')")
-    public ApiResponse<Map<String, Object>> operationLogs() {
-        return probe("operation-log:view");
-    }
-
     @GetMapping("/rbac/probes/registration")
     @PreAuthorize("hasAuthority('registration:manage')")
     public ApiResponse<Map<String, Object>> registration() {

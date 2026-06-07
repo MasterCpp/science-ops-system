@@ -1,6 +1,5 @@
-# Issue 015: 操作日志和审计查询
-
-Status: `ready-for-agent`
+# Issue 015: Operation Log Audit Query
+Status: `completed`
 
 ## Parent
 
@@ -13,28 +12,39 @@ Status: `ready-for-agent`
 - `docs/prototype/002-admin-wireframes.md`
 - `docs/testing/001-test-plan.md`
 
-## What to build
+## What was built
 
-实现关键后台操作的操作日志记录、日志列表、筛选和详情查看，仅超级管理员可访问。
+Implemented append-only admin operation logging for key back-office actions, plus super-admin-only operation log list/detail APIs.
 
 ## Acceptance criteria
 
-- [ ] 活动创建、修改、删除写入操作日志。
-- [ ] 活动发布、开始、结束、归档写入操作日志。
-- [ ] 导出操作写入操作日志。
-- [ ] 报名补录和取消写入操作日志。
-- [ ] 签到补签和撤销写入操作日志。
-- [ ] 志愿者审核写入操作日志。
-- [ ] 照片/附件删除写入操作日志。
-- [ ] 操作日志包含管理员 ID、用户名、角色、动作、目标类型、目标 ID、目标摘要、IP、User-Agent、详情和时间。
-- [ ] 超级管理员可以查看日志列表和详情。
-- [ ] 活动管理员和志愿者管理员不能查看操作日志。
-- [ ] 日志列表支持管理员、动作、目标类型和时间范围筛选。
-- [ ] V1 不提供操作日志删除能力。
-- [ ] 覆盖日志写入、筛选、详情和权限拒绝测试。
+- [x] Activity create, update, and delete write operation logs.
+- [x] Activity publish, start, end, archive, and unarchive write operation logs.
+- [x] Export actions write operation logs for registration, check-in, volunteer application, visitor report, survey response, and photo ZIP exports.
+- [x] Registration backfill and cancel write operation logs.
+- [x] Manual audience check-in and check-in revoke write operation logs.
+- [x] Volunteer application review actions write operation logs.
+- [x] Volunteer attendance manual check-in, manual check-out, adjustment, and revoke write operation logs.
+- [x] Photo and attachment deletion writes operation logs.
+- [x] Operation logs include admin user ID, username, role code, action, target type, target ID, target summary, IP, User-Agent, detail JSON, and created time.
+- [x] Super admin can view operation log list and detail.
+- [x] Activity admin and volunteer admin cannot view operation logs.
+- [x] Operation log list supports filtering by admin, action, target type, and created-time range.
+- [x] V1 provides no operation log deletion API.
+- [x] Tests cover log writing, filtering, detail, and permission rejection.
+
+## Implemented files
+
+- `server/src/main/java/com/example/scienceops/operationlog/`
+- `server/src/main/java/com/example/scienceops/admin/operationlog/AdminOperationLogController.java`
+- `server/src/test/java/com/example/scienceops/OperationLogAuditFlowTests.java`
+
+## Verification
+
+- `mvn -f server/pom.xml test`
+- Result: `50 tests, 0 failures, 0 errors`
 
 ## Blocked by
 
 - `.scratch/issues/003-admin-auth-jwt-rbac-baseline.md`
 - `.scratch/issues/004-admin-activity-lifecycle.md`
-

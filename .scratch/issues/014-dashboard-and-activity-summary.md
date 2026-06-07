@@ -1,6 +1,5 @@
-# Issue 014: 活动总结数据页和仪表盘
-
-Status: `ready-for-agent`
+# Issue 014: Dashboard and activity summary
+Status: `completed`
 
 ## Parent
 
@@ -15,24 +14,32 @@ Status: `ready-for-agent`
 
 ## What to build
 
-实现活动详情统计卡片和后台 Dashboard 指标，把报名、签到、志愿者、问卷和照片数据汇总展示。
+Implement activity detail summary cards and back-office dashboard metrics that summarize registration, check-in, volunteer, survey, and photo data.
 
 ## Acceptance criteria
 
-- [ ] 活动详情展示报名人数。
-- [ ] 活动详情展示实际签到人数。
-- [ ] 活动详情展示签到率。
-- [ ] 活动详情展示志愿者报名人数。
-- [ ] 活动详情展示志愿者通过人数。
-- [ ] 活动详情展示志愿者总服务时长。
-- [ ] 活动详情展示问卷提交人数。
-- [ ] 活动详情展示平均满意度评分。
-- [ ] 活动详情展示照片数量。
-- [ ] Dashboard 展示角色可见的汇总指标。
-- [ ] Dashboard 展示近期活动。
-- [ ] Dashboard 展示待审核志愿者申请入口。
-- [ ] 指标不统计取消报名、撤销签到、撤销志愿者考勤和删除照片。
-- [ ] 覆盖活动汇总和角色可见性的测试。
+- [x] Activity detail shows registered attendee count.
+- [x] Activity detail shows actual checked-in count.
+- [x] Activity detail shows check-in rate.
+- [x] Activity detail shows volunteer application count.
+- [x] Activity detail shows approved volunteer count.
+- [x] Activity detail shows total volunteer service minutes.
+- [x] Activity detail shows survey response count.
+- [x] Activity detail shows average satisfaction rating.
+- [x] Activity detail shows photo count.
+- [x] Dashboard shows role-visible summary metrics.
+- [x] Dashboard shows upcoming activities.
+- [x] Dashboard shows pending volunteer application entry.
+- [x] Metrics exclude cancelled registrations, revoked check-ins, revoked volunteer attendance, and deleted photos.
+- [x] Tests cover activity summary and role visibility.
+
+## Completion notes
+
+- Completed on 2026-06-07.
+- Added cross-module summary fields to admin activity detail responses.
+- Added dashboard summary, upcoming activity, and pending volunteer application endpoints.
+- Dashboard metrics are permission-aware and return zero or empty module data outside the current admin role's visible scope.
+- Added integration tests for per-activity summary exclusions and dashboard role visibility.
 
 ## Blocked by
 
@@ -41,4 +48,3 @@ Status: `ready-for-agent`
 - `.scratch/issues/009-volunteer-attendance-service-hours-flow.md`
 - `.scratch/issues/011-activity-files-photos-archive-flow.md`
 - `.scratch/issues/013-survey-response-statistics-export-flow.md`
-

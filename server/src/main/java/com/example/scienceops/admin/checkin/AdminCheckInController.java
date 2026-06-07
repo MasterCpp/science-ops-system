@@ -1,12 +1,14 @@
 package com.example.scienceops.admin.checkin;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import com.example.scienceops.checkin.CheckInResponse;
 import com.example.scienceops.checkin.CheckInService;
 import com.example.scienceops.checkin.ManualCheckInRequest;
 import com.example.scienceops.common.api.ApiResponse;
 import com.example.scienceops.common.api.PagedResponse;
+import com.example.scienceops.operationlog.OperationLogService;
 import com.example.scienceops.security.AdminPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -28,9 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminCheckInController {
 
     private final CheckInService service;
+    private final OperationLogService operationLogService;
 
-    public AdminCheckInController(CheckInService service) {
+    public AdminCheckInController(CheckInService service, OperationLogService operationLogService) {
         this.service = service;
+        this.operationLogService = operationLogService;
     }
 
     @GetMapping("/activities/{activityId}/check-ins")
@@ -68,10 +72,17 @@ public class AdminCheckInController {
 
     @GetMapping("/activities/{activityId}/check-ins/export")
     @PreAuthorize("hasAuthority('check-in:manage')")
-    public ResponseEntity<byte[]> export(@PathVariable Long activityId) {
+    public ResponseEntity<byte[]> export(
+            @PathVariable Long activityId,
+            @AuthenticationPrincipal AdminPrincipal principal
+    ) {
+        byte[] csv = service.exportCsv(activityId);
+        operationLogService.record(principal, "CHECK_IN_EXPORT", "CHECK_IN", activityId, "Activity check-ins", Map.of(
+                "activityId", activityId
+        ));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"check-ins.csv\"")
                 .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
-                .body(service.exportCsv(activityId));
+                .body(csv);
     }
 }

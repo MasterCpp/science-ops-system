@@ -1,6 +1,7 @@
 package com.example.scienceops.admin.activity;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 record ActivityRecord(
         Long id,
@@ -19,7 +20,14 @@ record ActivityRecord(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         long registeredAttendeeCount,
-        long checkedInCount
+        long checkedInCount,
+        BigDecimal checkInRate,
+        long volunteerApplicationCount,
+        long approvedVolunteerCount,
+        long totalServiceMinutes,
+        long surveyResponseCount,
+        BigDecimal averageRating,
+        long photoCount
 ) {
 
     ActivityResponse toResponse() {
@@ -39,6 +47,13 @@ record ActivityRecord(
                 status,
                 registeredAttendeeCount,
                 checkedInCount,
+                checkInRate,
+                volunteerApplicationCount,
+                approvedVolunteerCount,
+                totalServiceMinutes,
+                surveyResponseCount,
+                averageRating,
+                photoCount,
                 createdAt,
                 updatedAt
         );

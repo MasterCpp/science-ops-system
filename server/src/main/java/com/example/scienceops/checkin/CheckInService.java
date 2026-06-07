@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.example.scienceops.common.api.PagedResponse;
@@ -12,6 +13,7 @@ import com.example.scienceops.common.enums.CheckInStatus;
 import com.example.scienceops.common.enums.RegistrationStatus;
 import com.example.scienceops.common.error.BusinessRuleException;
 import com.example.scienceops.common.error.NotFoundException;
+import com.example.scienceops.operationlog.OperationLogService;
 import com.example.scienceops.security.AdminPrincipal;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +21,12 @@ import org.springframework.stereotype.Service;
 public class CheckInService {
 
     private final CheckInRepository repository;
+    private final OperationLogService operationLogService;
     private final Clock clock;
 
-    public CheckInService(CheckInRepository repository) {
+    public CheckInService(CheckInRepository repository, OperationLogService operationLogService) {
         this.repository = repository;
+        this.operationLogService = operationLogService;
         this.clock = Clock.systemDefaultZone();
     }
 
@@ -47,16 +51,28 @@ public class CheckInService {
         }
         requireRegistered(registration);
         LocalDateTime checkInTime = request.checkInTime() == null ? LocalDateTime.now(clock) : request.checkInTime();
-        return createOrReactivate(registration, checkInTime, "MANUAL", true, principal.id());
+        CheckInResponse response = createOrReactivate(registration, checkInTime, "MANUAL", true, principal.id());
+        operationLogService.record(principal, "CHECK_IN_MANUAL", "CHECK_IN", Long.valueOf(response.id()), response.name(), Map.of(
+                "activityId", activityId,
+                "registrationId", registration.id(),
+                "phone", registration.phone()
+        ));
+        return response;
     }
 
     public CheckInResponse revoke(Long checkInId, AdminPrincipal principal) {
-        repository.findCheckIn(checkInId)
+        CheckInRecord current = repository.findCheckIn(checkInId)
                 .orElseThrow(() -> new NotFoundException("Check-in not found"));
         repository.revoke(checkInId, principal.id(), LocalDateTime.now(clock));
-        return repository.findCheckIn(checkInId)
+        CheckInResponse response = repository.findCheckIn(checkInId)
                 .map(this::toResponse)
                 .orElseThrow(() -> new NotFoundException("Check-in not found"));
+        operationLogService.record(principal, "CHECK_IN_REVOKE", "CHECK_IN", current.id(), current.name(), Map.of(
+                "activityId", current.activityId(),
+                "registrationId", current.registrationId(),
+                "phone", current.phone()
+        ));
+        return response;
     }
 
     public PagedResponse<CheckInResponse> list(Long activityId, String keyword, String status, LocalDateTime checkedFrom, LocalDateTime checkedTo, int page, int pageSize) {

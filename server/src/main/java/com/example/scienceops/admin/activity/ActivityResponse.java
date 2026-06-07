@@ -1,6 +1,7 @@
 package com.example.scienceops.admin.activity;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 public record ActivityResponse(
         String id,
@@ -18,6 +19,13 @@ public record ActivityResponse(
         String status,
         long registeredAttendeeCount,
         long checkedInCount,
+        BigDecimal checkInRate,
+        long volunteerApplicationCount,
+        long approvedVolunteerCount,
+        long totalServiceMinutes,
+        long surveyResponseCount,
+        BigDecimal averageRating,
+        long photoCount,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

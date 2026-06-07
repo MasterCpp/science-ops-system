@@ -14,6 +14,7 @@ import com.example.scienceops.common.enums.ActivityStatus;
 import com.example.scienceops.common.enums.RegistrationStatus;
 import com.example.scienceops.common.error.BusinessRuleException;
 import com.example.scienceops.common.error.NotFoundException;
+import com.example.scienceops.operationlog.OperationLogService;
 import com.example.scienceops.security.AdminPrincipal;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +22,12 @@ import org.springframework.stereotype.Service;
 public class RegistrationService {
 
     private final RegistrationRepository repository;
+    private final OperationLogService operationLogService;
     private final Clock clock;
 
-    public RegistrationService(RegistrationRepository repository) {
+    public RegistrationService(RegistrationRepository repository, OperationLogService operationLogService) {
         this.repository = repository;
+        this.operationLogService = operationLogService;
         this.clock = Clock.systemDefaultZone();
     }
 
@@ -39,12 +42,17 @@ public class RegistrationService {
         return createRegistration(activity, request);
     }
 
-    public RegistrationResponse backfill(Long activityId, RegistrationRequest request) {
+    public RegistrationResponse backfill(Long activityId, RegistrationRequest request, AdminPrincipal principal) {
         RegistrationActivityRecord activity = requireActivity(activityId);
         if (ActivityStatus.valueOf(activity.status()) == ActivityStatus.ARCHIVED) {
             throw new BusinessRuleException("INVALID_STATE", "Archived activity cannot accept backfilled registrations", 409);
         }
-        return createRegistration(activity, request);
+        RegistrationResponse response = createRegistration(activity, request);
+        operationLogService.record(principal, "REGISTRATION_BACKFILL", "REGISTRATION", Long.valueOf(response.id()), response.name(), Map.of(
+                "activityId", activity.id(),
+                "phone", response.phone()
+        ));
+        return response;
     }
 
     public PagedResponse<RegistrationResponse> list(Long activityId, String keyword, String status, int page, int pageSize) {
@@ -66,9 +74,14 @@ public class RegistrationService {
         RegistrationRecord registration = repository.findRegistration(registrationId)
                 .orElseThrow(() -> new NotFoundException("Registration not found"));
         repository.cancel(registrationId, principal.id(), LocalDateTime.now(clock));
-        return repository.findRegistration(registrationId)
+        RegistrationResponse response = repository.findRegistration(registrationId)
                 .map(this::toResponse)
                 .orElseThrow(() -> new NotFoundException("Registration not found"));
+        operationLogService.record(principal, "REGISTRATION_CANCEL", "REGISTRATION", registration.id(), registration.name(), Map.of(
+                "activityId", registration.activityId(),
+                "phone", registration.phone()
+        ));
+        return response;
     }
 
     public byte[] exportCsv(Long activityId) {
